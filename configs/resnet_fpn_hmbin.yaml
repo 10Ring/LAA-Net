@@ -1,0 +1,102 @@
+TASK: heatmapbin
+PRECISION: float64
+DATASET:
+  type: HeatmapFaceForensic
+  TRAIN: True #Switch to True for training mode, False for testing mode
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  # FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  FROM_FILE: True
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+  IMAGE_SIZE: [256, 256]
+  HEATMAP_SIZE: [64, 64]
+  SIGMA: 2
+  ADAPTIVE_SIGMA: False
+  HEATMAP_TYPE: gaussian
+  DATA:
+    TYPE: images
+    TRAIN:
+      FAKETYPE: [FaceXRay]
+      ANNO_FILE: FaceXRay/train/train_FF_Xray.json
+      LABEL_FOLDER: [real, fake]
+    VAL:
+      FAKETYPE: [FaceXRay]
+      ANNO_FILE: FaceXRay/val/val_FF_Xray.json
+      LABEL_FOLDER: [real, fake]
+    TEST:
+      FAKETYPE: [NeuralTextures]
+      ANNO_FILE: FaceXRay/test/test_FF_Xray.json
+      LABEL_FOLDER: [real, fake]
+  TRANSFORM:
+    geometry:
+      type: GeometryTransform
+      resize: [256, 256, 0] #h, w, p=probability. If no affine transform, set p=1
+      normalize: 0
+      horizontal_flip: 0.5
+    color:
+      type: ColorJitterTransform
+      clahe: 0.5
+      colorjitter: 0.5
+      gaussianblur: 0.5
+      jpegcompression: 0.0
+      rgbshift: 0.5
+    normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  DEBUG: False
+  DYNAMIC_FXRAY: False
+MODEL:
+  type: PoseResNet
+  num_layers: 50
+  # block: Bottleneck
+  layers: [3, 4, 6, 3]
+  heads:
+    hm: 1
+    cls: 1
+  head_conv: 64
+  is_fpn: False
+  dropout_prob: 0.4
+TRAIN:
+  gpus: [0,1,2,3]
+  batch_size: 32
+  lr: 0.001
+  epochs: 30
+  begin_epoch: 0
+  warm_up: 6
+  every_val_epochs: 1
+  loss:
+    type: HeatmapBinaryLoss
+    use_target_weight: False
+    cls_lmda: 0.05
+    reduction: 'mean'
+    cls_cal: True
+  optimizer: Adam
+  distributed: False
+  pretrained: 'logs/23-11-2022/PoseResNet_heatmapbin_model_best.pth'
+  tensorboard: True
+  resume: True
+  lr_scheduler:
+    # type: MultiStepLR
+    milestones: [5, 15, 20, 25]
+    gamma: 0.5
+  freeze_backbone: True
+  debug:
+    save_hm_gt: True
+    save_hm_pred: True
+TEST:
+  subtask: 'eval'
+  test_file: ''
+  vis_hm: True
+  threshold: 0.5
+  pretrained: 'logs/16-11-2022/PoseResNet_model_best.pth'
+PREPROCESSING:
+  DATASET: FaceForensics
+  SPLIT: train
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  DATA_TYPE: images
+  LABEL: [real, fake]
+  facial_lm_pretrained: pretrained/shape_predictor_68_face_landmarks.dat
+  DEBUG: False

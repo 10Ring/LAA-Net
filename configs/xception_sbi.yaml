@@ -1,0 +1,128 @@
+TASK: Xception_heatmap_sbi_based_CLS_Focal_NoC2
+PRECISION: float64
+METRICS_BASE: combine
+SEED: 5
+DATASET:
+  type: SBIFaceForensic
+  TRAIN: True #Switch to True for training mode, False for testing mode
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  # ROOT: /home/users/<user>/data/FaceForensics++/c23/
+  # FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  FROM_FILE: True
+  NUM_WORKERS: 4
+  PIN_MEMORY: True
+  IMAGE_SIZE: [380, 380]
+  HEATMAP_SIZE: [96, 96] #[IMAGE_SIZE//4, IMAGE_SIZE//4]
+  SIGMA: 3
+  ADAPTIVE_SIGMA: False
+  HEATMAP_TYPE: gaussian
+  DATA:
+    TYPE: images
+    SAMPLES_PER_VIDEO: 
+      ACTIVE: True
+      TRAIN: 8
+      VAL: 32
+      TEST: 32
+    TRAIN:
+      FAKETYPE: [FaceXRay]
+      # ANNO_FILE: FaceXRay/train/train_FF_Xray.json
+      ANNO_FILE: FaceXRay/train/new_trainBI_FF.json
+      # ANNO_FILE: processed_data/new_valBI_FF.json
+      LABEL_FOLDER: [real, fake]
+    VAL:
+      FAKETYPE: [FaceXRay]
+      # ANNO_FILE: FaceXRay/val/val_FF_Xray.json
+      ANNO_FILE: processed_data/new_valBI_FF.json
+      LABEL_FOLDER: [real, fake]
+    TEST:
+      FAKETYPE: [FaceXRay]
+      ANNO_FILE: FaceXRay/test/test_FF_Xray.json
+      LABEL_FOLDER: [real, fake]
+  TRANSFORM:
+    geometry:
+      type: GeometryTransform
+      resize: [380, 380, 0] #h, w, p=probability. If no affine transform, set p=1
+      normalize: 0
+      horizontal_flip: 0.5
+      #Either Scaling or Cropping, not do at the same time
+      cropping: [0.75, 1.25, 1] #Format: [low, high, prob]
+      scale: [0.1, 0.25, 1] #Format: [shift, scale, prob]
+      erasing: 0.5
+    color:
+      type: ColorJitterTransform
+      clahe: 0.0
+      colorjitter: 0.3
+      gaussianblur: 0.3
+      jpegcompression: 0.5
+      rgbshift: 0.3
+      randomcontrast: 0.0
+      randomgamma: 0.5
+      randombrightness: 1
+      huesat: 1
+    normalize:
+      mean: [0.5, 0.5, 0.5]
+      std: [0.5, 0.5, 0.5]
+  DEBUG: False
+  DYNAMIC_FXRAY: True
+MODEL:
+  type: Xception
+  heads:
+    hm: 1
+    cls: 1
+    offset: 1
+  head_conv: 64
+  dropout_prob: 0.5
+  fpn: True
+  cls_based_hm: False
+  use_c2: False
+  INIT_WEIGHTS:
+    pretrained: True
+TRAIN:
+  gpus: [0,1,2,3]
+  batch_size: 12
+  lr: 0.00001
+  epochs: 100
+  begin_epoch: 0
+  warm_up: 5
+  every_val_epochs: 1
+  loss:
+    type: CombinedFocalLoss
+    use_target_weight: False
+    cls_lmda: 1
+    dst_hm_cls_lmda: 0.09
+    offset_lmda: 0
+    hm_lmda: 1
+    mse_reduction: sum
+    ce_reduction: mean
+  optimizer: Adam
+  distributed: False
+  pretrained: 'logs/01-01-2023/Xception_Xception_heatmap_sbi_based_CLS_Focal_NoC2_model_best.pth'
+  tensorboard: True
+  resume: True
+  lr_scheduler:
+    type: LinearDecayLR
+    milestones: [30]
+    gamma: 0.5
+  freeze_backbone: False
+  debug:
+    active: True
+    save_hm_gt: True
+    save_hm_pred: True
+TEST:
+  gpus: [0,1,2,3]
+  subtask: 'eval'
+  test_file: ''
+  vis_hm: True
+  threshold: 0.5
+  pretrained: 'logs/28-12-2022/PoseResNet_heatmap_sbi_based_CLS_Focal_C2_101_model_best.pth'
+PREPROCESSING:
+  DATASET: FaceForensics
+  SPLIT: train
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  DATA_TYPE: images
+  LABEL: [real, fake]
+  facial_lm_pretrained: pretrained/shape_predictor_68_face_landmarks.dat
+  DEBUG: False

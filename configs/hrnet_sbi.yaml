@@ -1,0 +1,170 @@
+TASK: heatmap_sbi_separated_CLS_Focal_C2
+PRECISION: float64
+METRICS_BASE: combine
+DATASET:
+  type: SBIFaceForensic
+  TRAIN: True #Switch to True for training mode, False for testing mode
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  # ROOT: /home/users/<user>/data/FaceForensics++/c23/
+  # FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  FROM_FILE: True
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+  IMAGE_SIZE: [384, 384]
+  HEATMAP_SIZE: [96, 96] #[IMAGE_SIZE//4, IMAGE_SIZE//4]
+  SIGMA: 3
+  ADAPTIVE_SIGMA: False
+  HEATMAP_TYPE: gaussian
+  DATA:
+    TYPE: images
+    SAMPLES_PER_VIDEO: 32
+    TRAIN:
+      FAKETYPE: [FaceXRay]
+      # ANNO_FILE: FaceXRay/train/train_FF_Xray.json
+      # ANNO_FILE: FaceXRay/train/new_trainBI_FF.json
+      ANNO_FILE: processed_data/new_valBI_FF.json
+      LABEL_FOLDER: [real, fake]
+    VAL:
+      FAKETYPE: [FaceXRay]
+      # ANNO_FILE: FaceXRay/val/val_FF_Xray.json
+      ANNO_FILE: processed_data/new_valBI_FF.json
+      LABEL_FOLDER: [real, fake]
+    TEST:
+      FAKETYPE: [FaceXRay]
+      ANNO_FILE: FaceXRay/test/test_FF_Xray.json
+      LABEL_FOLDER: [real, fake]
+  TRANSFORM:
+    geometry:
+      type: GeometryTransform
+      resize: [256, 256, 0] #h, w, p=probability. If no affine transform, set p=1
+      normalize: 0
+      horizontal_flip: 0.5
+    color:
+      type: ColorJitterTransform
+      clahe: 0.0
+      colorjitter: 0.3
+      gaussianblur: 0.3
+      jpegcompression: 0.5
+      rgbshift: 0.3
+      randomcontrast: 0.0
+      randomgamma: 0.5
+      randombrightness: 1
+      huesat: 1
+    normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+  DEBUG: False
+  DYNAMIC_FXRAY: True
+MODEL:
+  type: PoseHighResolutionNet
+  INIT_WEIGHTS:
+      pretrained: 'pretrained/hrnet_w48-8ef0771d.pth'
+  MODEL:
+    NAME: pose_hrnet
+    NUM_JOINTS: 1
+    HEATMAP_SIZE: [96, 96]
+    cls_based_hm: True
+    heads:
+      hm: 1
+      cls: 1
+    EXTRA:
+      PRETRAINED_LAYERS:
+      - 'conv1'
+      - 'bn1'
+      - 'conv2'
+      - 'bn2'
+      - 'layer1'
+      - 'transition1'
+      - 'stage2'
+      - 'transition2'
+      - 'stage3'
+      - 'transition3'
+      - 'stage4'
+      FINAL_CONV_KERNEL: 1
+      STAGE2:
+        NUM_MODULES: 1
+        NUM_BRANCHES: 2
+        BLOCK: BASIC
+        NUM_BLOCKS:
+        - 4
+        - 4
+        NUM_CHANNELS:
+        - 48
+        - 96
+        FUSE_METHOD: SUM
+      STAGE3:
+        NUM_MODULES: 4
+        NUM_BRANCHES: 3
+        BLOCK: BASIC
+        NUM_BLOCKS:
+        - 4
+        - 4
+        - 4
+        NUM_CHANNELS:
+        - 48
+        - 96
+        - 192
+        FUSE_METHOD: SUM
+      STAGE4:
+        NUM_MODULES: 3
+        NUM_BRANCHES: 4
+        BLOCK: BASIC
+        NUM_BLOCKS:
+        - 4
+        - 4
+        - 4
+        - 4
+        NUM_CHANNELS:
+        - 48
+        - 96
+        - 192
+        - 384
+        FUSE_METHOD: SUM
+TRAIN:
+  gpus: [0,1,2]
+  batch_size: 16
+  lr: 0.001
+  epochs: 30
+  begin_epoch: 0
+  warm_up: 5
+  every_val_epochs: 1
+  loss:
+    type: CombinedFocalLoss
+    use_target_weight: False
+    cls_lmda: 0.08
+    # dst_lmda: 0.05
+    reduction: 'mean'
+    # dist_cal: False
+    cls_cal: True
+    combine_compute: False
+  optimizer: SAM
+  distributed: False
+  # pretrained: 'logs/05-12-2022/PoseResNet_heatmap_FPN_Separated_CLS_Focal_NoFrZ_model_best.pth'
+  tensorboard: True
+  resume: False
+  lr_scheduler:
+    type: LinearDecayLR
+    milestones: [5, 12]
+    gamma: 0.5
+  freeze_backbone: False
+  debug:
+    save_hm_gt: True
+    save_hm_pred: True
+TEST:
+  gpus: [0,1,2]
+  subtask: 'eval'
+  test_file: ''
+  vis_hm: True
+  threshold: 0.5
+  # pretrained: 'logs/05-12-2022/PoseResNet_heatmap_FPN_Separated_CLS_Focal_NoFrZ_model_best.pth'
+PREPROCESSING:
+  DATASET: FaceForensics
+  SPLIT: train
+  ROOT: /data/deepfake_cluster/datasets_df/FaceForensics++/c23/
+  FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  IMAGE_SUFFIX: jpg
+  DATA_TYPE: images
+  LABEL: [real, fake]
+  facial_lm_pretrained: pretrained/shape_predictor_68_face_landmarks.dat
+  DEBUG: False

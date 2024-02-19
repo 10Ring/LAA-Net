@@ -1,0 +1,16 @@
+PREPROCESSING:
+  DATASET: Celeb-DFv2
+  COMPRESSION: c0
+  SPLIT: test
+  ROOT: /data/deepfake_cluster/datasets_df/Celeb-DFv2/
+  # FAKETYPE: [Deepfakes, Face2Face, FaceSwap, NeuralTextures]
+  FAKETYPE: [YouTube-real]
+  IMAGE_SUFFIX: png
+  DATA_TYPE: frames
+  LABEL: [real]
+  facial_lm_pretrained: pretrained/shape_predictor_81_face_landmarks.dat
+  N_LANDMARKS: 81
+  SAMPLING:
+    ACTIVE: False
+    NUMBERS: 8
+  DEBUG: False
