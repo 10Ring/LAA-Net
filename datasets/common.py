@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from torch.utils.data import Dataset
 from glob import glob
 import numpy as np
-from easydict import EasyDict as edict
+from box import Box as edict
 
 from .builder import DATASETS
 from package_utils.utils import file_extention

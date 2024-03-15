@@ -17,7 +17,7 @@ RUN apt-get -y update && \
     apt-get install -y libgl1-mesa-dev && \
     apt-get -y update && apt-get install -y libopencv-dev
 
-RUN pip install albumentations==1.1.0 dlib==19.24.0 easydict==1.10 imgaug==0.4.0 && \
+RUN pip install albumentations==1.1.0 dlib==19.24.0 python-box==7.1.1 imgaug==0.4.0 && \
     pip install imutils==0.5.4 ipython numpy==1.23.3 opencv-python==4.5.1.48 && \
     pip install pandas==1.3.5 Pillow==9.3.0 scikit-image==0.19.3 scipy==1.9.3 simplejson && \
     pip install tensorboardX==2.5.1 tqdm PyYAML 

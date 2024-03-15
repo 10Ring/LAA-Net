@@ -6,7 +6,7 @@ try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import Loader, Dumper    
-from easydict import EasyDict as edict
+from box import Box as edict
 
 
 def load_config(cfg):

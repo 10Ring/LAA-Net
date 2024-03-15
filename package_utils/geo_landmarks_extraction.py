@@ -9,7 +9,7 @@ if not os.getcwd() in sys.path:
 import random
 
 import simplejson as json
-from easydict import EasyDict as edict
+from box import Box as edict
 from glob import glob
 import dlib
 import cv2
