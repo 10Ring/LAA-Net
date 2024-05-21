@@ -185,7 +185,7 @@ We acknowledge the excellent implementation from [mmengine](https://github.com/o
 
 
 ## LICENSE
-This software is © University of Luxembourg and is licensed under the ……… license. See [LICENSE](LICENSE)
+This software is © University of Luxembourg and is licensed under the snt academic license. See [LICENSE](LICENSE)
 
 
 ## CITATION
