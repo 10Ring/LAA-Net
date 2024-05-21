@@ -1,4 +1,4 @@
-# LAA-Net: Localized Artifact Attention Network for High-Quality Deepfakes Detection
+# LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection
 
 ![alt text](./demo/laa_net.png?raw=true)
 This is an official implementation for LAA-Net! [[Paper](https://arxiv.org/pdf/2401.13856.pdf)]
