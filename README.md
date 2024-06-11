@@ -6,7 +6,7 @@ This is an official implementation for LAA-Net! [[Paper](https://arxiv.org/pdf/2
 
 ## Updates
 
-- [ ] *Comming soon: Release pretrained weights.*
+- [x] Released pretrained weights
 - [x] 26/02/2024: *LAA-Net has been accepted in CVPR2024.*
 - [x] 15/11/2023: *First version pre-released for this open source code.*
 
@@ -45,7 +45,7 @@ Results on [FF++](https://github.com/ondyari/FaceForensics) in-dataset evaluatio
 
 
 ## LAA-Net Pre-trained Models
-* 📌 *The pre-trained weights of using BI and SBI will be released soon!*
+* 📌 *The pre-trained weights of using BI and SBI can be found [here](https://www.dropbox.com/scl/fo/dzmldaytujdeuky69d5x1/AIJrH2mit1hxnl1qzavM3vk?rlkey=nzzliincrfwejw2yr0ovldru1&st=z8ds7il7&dl=0)!*
 
 
 ## Docker Build (Optional)
@@ -185,19 +185,19 @@ We acknowledge the excellent implementation from [mmengine](https://github.com/o
 
 
 ## LICENSE
-This software is © University of Luxembourg and is licensed under the snt academic license. See [LICENSE](LICENSE)
+This software is © University of Luxembourg and is licensed under the snt academic license. See [LICENSE](NOTICE)
 
 
 ## CITATION
 Please kindly consider citing our papers in your publications.
 
 ```
-@misc{nguyen2024laanet,
-      title={LAA-Net: Localized Artifact Attention Network for High-Quality Deepfakes Detection}, 
-      author={Dat Nguyen and Nesryne Mejri and Inder Pal Singh and Polina Kuleshova and Marcella Astrid and Anis Kacem and Enjie Ghorbel and Djamila Aouada},
-      year={2024},
-      eprint={2401.13856},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@InProceedings{Nguyen_2024_CVPR,
+    author    = {Nguyen, Dat and Mejri, Nesryne and Singh, Inder Pal and Kuleshova, Polina and Astrid, Marcella and Kacem, Anis and Ghorbel, Enjie and Aouada, Djamila},
+    title     = {LAA-Net: Localized Artifact Attention Network for Quality-Agnostic and Generalizable Deepfake Detection},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month     = {June},
+    year      = {2024},
+    pages     = {17395-17405}
 }
 ```
