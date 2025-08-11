@@ -3,6 +3,8 @@ FROM pytorch/pytorch:1.8.0-cuda11.1-cudnn8-devel
 MAINTAINER XXX
 
 ENV TZ=Europe/XXX
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-key del 7fa2af80 && \
