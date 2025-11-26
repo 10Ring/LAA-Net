@@ -1,8 +1,8 @@
 FROM pytorch/pytorch:1.8.0-cuda11.1-cudnn8-devel
 
-MAINTAINER XXX
+MAINTAINER DatNguyen
 
-ENV TZ=Europe/XXX
+ENV TZ=Europe/Luxembourg
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-key del 7fa2af80 && \
